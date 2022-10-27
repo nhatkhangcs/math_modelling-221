@@ -18,5 +18,8 @@ def plot_data():
     plt.grid()
     plt.show()
 
-if __name__ == '__main__':
+def main():
     plot_data()
+
+if __name__ == '__main__':
+    main()

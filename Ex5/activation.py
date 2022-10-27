@@ -1,5 +1,5 @@
 import numpy as np
-import sys
+# import sys
 
 class Activation():
     def __init__(self, option):
@@ -10,7 +10,7 @@ class Activation():
             self.activation = self.LReLU
             self.gradient = self.d_LReLU
         else:
-            sys.exit("Invalid activation option, program terminated!")
+            raise UserWarning('Invalid activation function option, program terminated!')
 
     def sigmoid(self, z):
         return 1.0/(1.0 + np.exp(-z))
