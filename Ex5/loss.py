@@ -24,12 +24,12 @@ class Loss():
         dw3 = np.matmul(dz3, np.transpose(cache['a2']))
         db3 = np.sum(dz3, axis=1, keepdims=True)
 
-        da2 = np.matmul(cache['w3'].transpose(), dz3)
+        da2 = np.matmul(W['w3'].transpose(), dz3)
         dz2 = np.multiply(da2, d_Sigmoid(cache['z2']))
         dw2 = np.matmul(dz2, np.transpose(cache['a1']))
         db2 = np.sum(dz2, axis=1, keepdims=True)
         
-        da1 = np.matmul(cache['w2'].transpose(), dz2)
+        da1 = np.matmul(W['w2'].transpose(), dz2)
         dz1 = np.multiply(da1, d_Sigmoid(cache['z1']))
         dw1 = np.matmul(dz1, np.transpose(X))
         db1 = np.sum(dz1, axis=1, keepdims=True)
