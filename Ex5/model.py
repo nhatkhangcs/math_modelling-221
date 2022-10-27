@@ -6,7 +6,7 @@ class Net():
     def __init__(self):
         # Network
         self.W = {}
-        self.W['w1'] = (np.random.randn(5, 30)) * 0.01
+        self.W['w1'] = (np.random.randn(5, 1)) * 0.01
         self.W['w2'] = (np.random.randn(5, 5)) * 0.01
         self.W['w3']= (np.random.randn(2, 5)) * 0.01
         self.B = {}
@@ -59,10 +59,12 @@ class Net():
                     }
     
     def train(self, X, Y, lr=0.5, num_epochs=50):
+        if len(X.shape) == 1:
+            X = np.expand_dims(X, axis=0)
         m = X.shape[1]
         for epoch in range(1, num_epochs + 1):
             forw_cache = self.forward(X, cache_res=True)
-            back = self.loss.backward(X, Y, self.W, forw_cache)
+            back = self.loss.backward(X, Y, self.W, self.G, forw_cache)
 
             self.W['w1'] -= np.multiply(lr/m, back['dw1'])
             self.W['w2'] -= np.multiply(lr/m, back['dw2'])

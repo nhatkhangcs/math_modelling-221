@@ -25,12 +25,12 @@ class Loss():
         db3 = np.sum(dz3, axis=1, keepdims=True)
 
         da2 = np.matmul(W['w3'].transpose(), dz3)
-        dz2 = np.multiply(da2, d_Sigmoid(cache['z2']))
+        dz2 = np.multiply(da2, G['g2'].grad(cache['z2']))
         dw2 = np.matmul(dz2, np.transpose(cache['a1']))
         db2 = np.sum(dz2, axis=1, keepdims=True)
         
         da1 = np.matmul(W['w2'].transpose(), dz2)
-        dz1 = np.multiply(da1, d_Sigmoid(cache['z1']))
+        dz1 = np.multiply(da1, G['g2'].grad(cache['z1']))
         dw1 = np.matmul(dz1, np.transpose(X))
         db1 = np.sum(dz1, axis=1, keepdims=True)
 
@@ -43,8 +43,8 @@ class Loss():
                     'db3': db3,
                 }
     
-    def backward(self, X, Y_true, W, cache_forward):
-        return self.back(X, Y_true, W, cache_forward)
+    def backward(self, X, Y_true, W, G, cache_forward):
+        return self.back(X, Y_true, W, G, cache_forward)
 
     def __call__(self, y_pred, y_true):
         return self.lossfnc(y_pred, y_true)

@@ -6,7 +6,7 @@ from activation import Activation
 
 def main():
     data = pd.read_csv('data/exact.csv')
-    data.reset_index(drop=True, inplace=True)
+    data = data.reset_index(drop=True, inplace=True)
     Y_true = data.to_numpy().transpose()
 
     x = np.linspace(0., 1., 1000)
