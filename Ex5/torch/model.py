@@ -6,11 +6,11 @@ class NetFit(nn.Module):
     def __init__(self, save_path='./', save_name='net_fit69.pt'):
         super().__init__()
         self.net = nn.Sequential(
-            nn.Linear(1, 7),
+            nn.Linear(1, 6),
             nn.Softplus(),
-            nn.Linear(7, 7),
+            nn.Linear(6, 6),
             nn.Softplus(),
-            nn.Linear(7, 2),
+            nn.Linear(6, 2),
         )
         # self.net = nn.Sequential(
         #     nn.Linear(1, 7),
