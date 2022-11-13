@@ -6,11 +6,12 @@ import matplotlib.pyplot as plt
 
 from model import NetFit, Net4
 from loss import InitMSELoss
+from config import args
 
 torch.Tensor.ndim = property(lambda self: len(self.shape))  # Fix it
 
 def plot_data_with_hypo(time_step, x, Y):
-    data = pd.read_csv('../data/exact.csv')
+    data = pd.read_csv(args.data_path)
     R_love = data['R']
     J_love = data['J']
 
@@ -20,7 +21,7 @@ def plot_data_with_hypo(time_step, x, Y):
     plt.plot(x[:, 0], Y[:, 0], 'c-', markersize=2, label='R Predict')
     plt.plot(x[:, 0], Y[:, 1], 'm-', markersize=2, label='J Predict')
     
-    plt.title('Dynamic of love between Romeo and Juliet :)')
+    plt.title('Fitting plot :)')
     plt.legend(loc="upper right")
     plt.xlabel('Time (s)')
     plt.ylabel('Love')
@@ -28,12 +29,12 @@ def plot_data_with_hypo(time_step, x, Y):
     plt.show()
 
 def derivative(model, t):
-    diff_x = torch.tensor(1e-3, dtype=torch.float32)
+    diff_x = torch.tensor(1e-4, dtype=torch.float32)
     diff_y = model(t + diff_x) - model(t - diff_x)
     return torch.div(diff_y, 2*diff_x)
 
 def train_fit():
-    data = pd.read_csv('../data/exact.csv', index_col=0)
+    data = pd.read_csv(args.data_path, index_col=0)
     data.reset_index(drop=True, inplace=True)
     # data = data.drop(['index'],axis=1)
     Y_true = data.to_numpy().reshape((-1, 2))
@@ -54,8 +55,8 @@ def train_fit():
     learning_rate = 0.01
     num_epochs = 30000
 
-    model_fit = NetFit(save_path='fit/', save_name='netfit_tanh_init.pt')
-    loss = InitMSELoss(init_weight=4)
+    model_fit = NetFit(save_path=args.fit_path, save_name=args.save_fit_name)
+    loss = InitMSELoss(init_weight=8)
     optim = torch.optim.SGD(model_fit.parameters(), lr=learning_rate)
 
     min_loss = float('inf')
@@ -78,7 +79,7 @@ def train_fit():
                 min_loss = l_test
                 model_fit.save()
 
-        if epoch % 500 == 0:
+        if epoch % 1000 == 0:
             print(f'Epoch: {epoch}, train loss: {l:.7f}, test loss: {l_test:.7f}')
 
     z = torch.linspace(0., 1., 10000).unsqueeze(0).transpose(0, 1).float()
@@ -90,8 +91,8 @@ def train_fit():
 
 
 def train_4():
-    model_fit = NetFit(save_path='fit/')
-    model_fit.load('fit/netfit_tanh_init.pt')
+    model_fit = NetFit()
+    model_fit.load(args.fit_path + args.save_fit_name)
     model_fit.grad_off()
     model_fit.eval()
 
@@ -107,17 +108,17 @@ def train_4():
     Y_true_perm = Y_true[random_idx, :]
     X_perm = X[random_idx, :]
 
-    X_train, X_test = X_perm.split([950, 50], dim=0)
-    Y_train, Y_test = Y_true_perm.split([950, 50], dim=0)
+    # X_train, X_test = X_perm.split([950, 50], dim=0)
+    # Y_train, Y_test = Y_true_perm.split([950, 50], dim=0)
 
-    # X_train, X_test = (X_perm, X_perm)
-    # Y_train, Y_test = (Y_true_perm, Y_true_perm)
+    X_train, X_test = (X_perm, X_perm)
+    Y_train, Y_test = (Y_true_perm, Y_true_perm)
 
     # Train hyper params
     learning_rate = 0.001
     num_epochs = 20000
     
-    model4 = Net4(save_path='4/', save_name='net4_tanh_init.pt')
+    model4 = Net4(save_path=args.abcd_path, save_name=args.save_abcd_name)
     loss = nn.MSELoss()
     optim = torch.optim.SGD(model4.parameters(), lr=learning_rate)
 
@@ -142,12 +143,12 @@ def train_4():
             print(f'Epoch: {epoch}, train loss: {l:.7f}, test loss: {l_test:.7f}')
 
 def view_model():
-    model_dict = torch.load('4/net4_tanh_init.pt')
+    model_dict = torch.load(args.abcd_path + args.save_abcd_name)
     print(model_dict)
 
 def plot_model_fit():
     model_fit = NetFit(save_path='fit/')
-    model_fit.load('fit/netfit_tanh_1.pt')
+    model_fit.load(args.fit_path + args.save_fit_name)
     model_fit.grad_off()
     model_fit.eval()
 
@@ -157,20 +158,20 @@ def plot_model_fit():
     plot_data_with_hypo(t, z, o)
 
 def plot_sol():
-    data = pd.read_csv('../data/exact.csv')
+    data = pd.read_csv(args.data_path)
     R_love = data['R']
     J_love = data['J']
 
     time_step = np.linspace(0., 1., 1000)
-    c1 = -0.30702
-    m1_1 = 1.32955
+    c1 = -0.27609
+    m1_1 = 1.33751
     m1_2 = 1.
-    v1 = np.exp((1/2) * (0.9621 + np.sqrt(72.00068461)) * time_step)
+    v1 = np.exp((1/2) * (-0.2323 + np.sqrt(103.06037)) * time_step)
     
-    c2 = 3.30702
-    m2_1 = -0.48133
+    c2 = 3.27609
+    m2_1 = -0.49776
     m2_2 = 1.
-    v2 = np.exp((1/2) * (0.9621 - np.sqrt(72.00068461)) * time_step)
+    v2 = np.exp((1/2) * (-0.2323 - np.sqrt(103.06037)) * time_step)
 
     R_sol = c1 * m1_1 * v1 + c2 * m2_1 * v2
     J_sol = c1 * m1_2 * v1 + c2 * m2_2 * v2
@@ -180,7 +181,38 @@ def plot_sol():
     plt.plot(time_step, R_sol, 'c-', markersize=2, label='R sol')
     plt.plot(time_step, J_sol, 'm-', markersize=2, label='J sol')
     
-    plt.title('Dynamic of love between Romeo and Juliet :)')
+    plt.title('Solution plot :)')
+    plt.legend(loc="upper right")
+    plt.xlabel('Time (s)')
+    plt.ylabel('Love')
+    plt.grid()
+    plt.show()
+
+def plot_sol_test():
+    data = pd.read_csv(args.data_path)
+    R_love = data['R']
+    J_love = data['J']
+
+    time_step = np.linspace(0., 1., 1000)
+    c1 = 1.90639
+    m1_1 = 1.32752
+    m1_2 = 1.
+    v1 = np.exp((1/2) * (0.1326 + np.sqrt(94.4945268)) * time_step)
+    
+    c2 = 1.09360
+    m2_1 = -0.48535
+    m2_2 = 1.
+    v2 = np.exp((1/2) * (0.1326  - np.sqrt(0.1326 )) * time_step)
+
+    R_sol = c1 * m1_1 * v1 + c2 * m2_1 * v2
+    J_sol = c1 * m1_2 * v1 + c2 * m2_2 * v2
+
+    plt.plot(time_step, R_love, 'r.', markersize=2, label='Romeo')
+    plt.plot(time_step, J_love, 'g.', markersize=2, label='Juliet')
+    plt.plot(time_step, R_sol, 'c-', markersize=2, label='R sol')
+    plt.plot(time_step, J_sol, 'm-', markersize=2, label='J sol')
+    
+    plt.title('Solution plot :)')
     plt.legend(loc="upper right")
     plt.xlabel('Time (s)')
     plt.ylabel('Love')
@@ -189,7 +221,8 @@ def plot_sol():
 
 if __name__ == '__main__':
     # train_fit()
-    # train_4()
-    # view_model()
+    train_4()
+    view_model()
     # plot_model_fit()
-    plot_sol()
+    # plot_sol()
+    # plot_sol_test()
