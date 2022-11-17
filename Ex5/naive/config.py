@@ -17,7 +17,7 @@ class args:
     abcd_num_epochs = 40000
     abcd_train_portion = 0.95
     
-    data_path = 'data/exact.csv'
+    data_path = '../data/exact.csv'
     num_samples = 1000
 
     figure_path = 'figures/'

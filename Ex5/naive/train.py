@@ -1,8 +1,5 @@
 import torch
 import torch.nn as nn
-# import pandas as pd
-# import numpy as np
-# import matplotlib.pyplot as plt
 
 from model import *
 from loss import *
