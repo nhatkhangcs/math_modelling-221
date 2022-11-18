@@ -15,11 +15,14 @@ class Model(nn.Module):
 
         in_features = sequence_len * hidden_size
         self.fc = nn.Sequential(
-            nn.Linear(in_features, 10),
+            nn.Dropout(0.5),
+            nn.Linear(in_features, 200),
             nn.Softplus(),
-            nn.Linear(10, 10),
+            nn.Dropout(0.5),
+            nn.Linear(200, 200),
             nn.Softplus(),
-            nn.Linear(10, 4)
+            nn.Dropout(0.5),
+            nn.Linear(200, 4)
         )
 
         self.save_path = save_path
@@ -34,13 +37,21 @@ class Model(nn.Module):
 
         out, _ = self.lstm(X)
 
-        flat = out.flatten()
-        unsqueeze_out = flat.unsqueeze(0)
+        out = out.flatten().unsqueeze(0)
 
-        abcd = self.fc(unsqueeze_out)
+        abcd = self.fc(out)
         y_pred = explicit_euler(data, abcd[0])
 
         return y_pred
+
+    def get_abcd(self, del_RJ):
+        out, _ = self.lstm(del_RJ)
+
+        out = out.flatten().unsqueeze(0)
+
+        abcd = self.fc(out)
+
+        return abcd
 
     def save(self):
         torch.save(self.state_dict(), self.save_path + self.save_name)
