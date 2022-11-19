@@ -17,7 +17,7 @@ def main():
     num_epochs = args.num_epochs
 
     # model setup
-    model = Model(100, save_name=args.model_name)
+    model = Model(50, save_name=args.model_name)
     loss = MSE()
 
     # DEBUG

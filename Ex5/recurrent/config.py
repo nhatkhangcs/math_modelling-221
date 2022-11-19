@@ -3,8 +3,8 @@ class args:
     model_name = '0.pt'
     view_name = '0.pt'
 
-    lr = 0.001
-    num_epochs = 200
+    lr = 0.00001
+    num_epochs = 2000
     print_every = 50
     train_portion = 0.8
     

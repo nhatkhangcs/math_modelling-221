@@ -16,13 +16,13 @@ class Model(nn.Module):
         in_features = sequence_len * hidden_size
         self.fc = nn.Sequential(
             nn.Dropout(0.5),
-            nn.Linear(in_features, 200),
+            nn.Linear(in_features, 256),
             nn.Softplus(),
             nn.Dropout(0.5),
-            nn.Linear(200, 200),
+            nn.Linear(256, 128),
             nn.Softplus(),
             nn.Dropout(0.5),
-            nn.Linear(200, 4)
+            nn.Linear(128, 4)
         )
 
         self.save_path = save_path
@@ -40,7 +40,8 @@ class Model(nn.Module):
         out = out.flatten().unsqueeze(0)
 
         abcd = self.fc(out)
-        y_pred = explicit_euler(data, abcd[0])
+        self.abcd = abcd[0]
+        y_pred = explicit_euler(data, self.abcd)
 
         return y_pred
 
