@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 
-class InitMSELoss(nn.Module):
+class InitMSE(nn.Module):
     def __init__(self, R0=-2, J0=3, init_weight=1):
         super().__init__()
         self.init_values = torch.tensor([[R0, J0]], dtype=torch.float32)

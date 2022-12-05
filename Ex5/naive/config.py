@@ -1,17 +1,17 @@
 class args:
     fit_path = 'fit/'
-    save_fit_name = 'netfit_softplus_1.pt'
-    load_fit_name = 'netfit_softplus_best_1.pt'
-    view_fit_name = 'netfit_softplus_1.pt'
+    save_fit_name = 'netfit_SP_test.pt'
+    load_fit_name = 'netfit_SP_test.pt'
+    view_fit_name = 'netfit_softplus_best_1.pt'
     
     abcd_path = '4/'
-    save_abcd_name = 'net4_softplus_1.pt'
-    load_abcd_name = 'net4_softplus_1.pt'
-    view_abcd_name = 'net4_softplus_best_of_best.pt'
+    save_abcd_name = 'net4_SP_test.pt'
+    load_abcd_name = 'net4_SP_test.pt'
+    view_abcd_name = 'net4_SP_test.pt'
 
     fit_lr = 0.01
     fit_num_epochs = 40000
-    fit_train_portion = 0.8
+    fit_train_portion = 0.9
 
     abcd_lr = 0.002
     abcd_num_epochs = 40000
@@ -21,4 +21,4 @@ class args:
     num_samples = 1000
 
     figure_path = 'figures/'
-    abcd_figure_name = 'abcd.png'
+    abcd_figure_name = 'abcd_1.png'

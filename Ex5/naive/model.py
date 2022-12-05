@@ -13,11 +13,18 @@ class NetFit(nn.Module):
             nn.Linear(6, 2),
         )
         # self.net = nn.Sequential(
-        #     nn.Linear(1, 7),
+        #     nn.Linear(1, 6),
+        #     nn.Sigmoid(),
+        #     nn.Linear(6, 6),
+        #     nn.Sigmoid(),
+        #     nn.Linear(6, 2),
+        # )
+        # self.net = nn.Sequential(
+        #     nn.Linear(1, 6),
         #     nn.Tanh(),
-        #     nn.Linear(7, 7),
+        #     nn.Linear(6, 6),
         #     nn.Tanh(),
-        #     nn.Linear(7, 2),
+        #     nn.Linear(6, 2),
         # )
         # self.net = nn.Sequential(
         #     nn.Linear(1, 6),

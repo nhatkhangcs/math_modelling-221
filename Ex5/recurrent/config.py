@@ -1,12 +1,15 @@
 class args:
     model_path = 'model/'
-    model_name = '0.pt'
-    view_name = '0.pt'
+    model_name = '4.pt'
+    view_name = '4.pt'
 
-    lr = 0.00001
-    num_epochs = 2000
-    print_every = 50
+    lr = 0.0005
+    num_epochs = 50
+    print_every = 10
     train_portion = 0.8
+
+    hidden_size = 128
+    sequence_len = 100
     
     data_path = '../data/exact.csv'
     num_samples = 1000

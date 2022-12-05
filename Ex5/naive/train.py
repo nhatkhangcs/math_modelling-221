@@ -4,7 +4,7 @@ import torch.nn as nn
 from model import *
 from loss import *
 from config import *
-from data import *
+from data_utils import *
 from visualize import *
 from utils import *
 
@@ -23,9 +23,6 @@ def train_fit():
     num_test_samples = args.num_samples - num_train_samples
     x_train, x_test = x_perm.split([num_train_samples, num_test_samples], dim=0)
     Y_train, Y_test = Y_true_perm.split([num_train_samples, num_test_samples], dim=0)
-    
-    # x_train, x_test = (x_perm, x_perm)
-    # Y_train, Y_test = (Y_true_perm, Y_true_perm)
 
     # Train hyper params
     learning_rate = args.fit_lr
@@ -33,11 +30,14 @@ def train_fit():
 
     # model setup
     model_fit = NetFit(save_path=args.fit_path, save_name=args.save_fit_name)
-    loss = InitMSELoss(init_weight=7)
+    loss = InitMSE(init_weight=7)
     optim = torch.optim.Adam(model_fit.parameters(), lr=learning_rate)
 
     min_loss = float('inf')
     init_x = torch.tensor([[0.]], dtype=torch.float32)
+    epoch_lst = []
+    train_loss_lst = []
+    test_loss_lst = []
     for epoch in range(1, num_epochs + 1):
         # train
         model_fit.train()
@@ -60,9 +60,15 @@ def train_fit():
                 # print(f'Old val loss: {min_loss:.5f} -> New val loss: {l_test:.5f}. Model saved')
                 min_loss = l_test
                 model_fit.save()
+        # epoch_lst.append(epoch)
+        # train_loss_lst.append(l.detach().numpy())
+        # test_loss_lst.append(l_test.detach().numpy())
 
         if epoch % 1000 == 0:
             print(f'Epoch: {epoch}, train loss: {l:.7f}, test loss: {l_test:.7f}')
+            epoch_lst.append(epoch)
+            train_loss_lst.append(l.detach().numpy())
+            test_loss_lst.append(l_test.detach().numpy())
 
     z = torch.linspace(0., 0.999, 10000).unsqueeze(0).transpose(0, 1).float()
     with torch.no_grad():
@@ -70,6 +76,7 @@ def train_fit():
         init_pred = model_fit(init_x)
         print(f'R0 = {init_pred[0][0]: .4f}, J0 = {init_pred[0][1]: .4f}')
     plot_data_with_hypo(x, z, Y)
+    save_learning_curve(epoch_lst, train_loss_lst, test_loss_lst, 'fit_l_curve.png')
 
 
 
@@ -112,6 +119,9 @@ def train_4():
     c_list = []
     d_list = []
     epoch_marks = []
+    epoch_lst = []
+    train_loss_lst = []
+    test_loss_lst = []
     for epoch in range(1, num_epochs + 1):
         # train
         model4.train()
@@ -146,12 +156,42 @@ def train_4():
 
             epoch_marks.append(epoch)
 
+        # epoch_lst.append(epoch)
+        # train_loss_lst.append(l.detach().numpy())
+        # test_loss_lst.append(l_test.detach().numpy())
+
         if epoch % 500 == 0:
             print(f'Epoch: {epoch}, train loss: {l:.7f}, test loss: {l_test:.7f}')
+            epoch_lst.append(epoch)
+            train_loss_lst.append(l.detach().numpy())
+            test_loss_lst.append(l_test.detach().numpy())
             
 
     abcd_evolution(epoch_marks, a_list, b_list, c_list, d_list)
+    save_learning_curve(epoch_lst, train_loss_lst, test_loss_lst, 'abcd_l_curve.png')
     view_model4()
+
+def solution_evaluation():
+    time_step, Y_true = load_data()
+
+    c1 = -0.28121
+    m1_1 = 1.33105
+    m1_2 = 1.
+    v1 = torch.exp((1/2) * (-0.4236 + torch.sqrt(torch.tensor(107.5216172))) * time_step)
+    
+    c2 = 3.28121
+    m2_1 = -0.49545
+    m2_2 = 1.
+    v2 = torch.exp((1/2) * (-0.4236  - torch.sqrt(torch.tensor(107.5216172))) * time_step)
+
+    R_sol = c1 * m1_1 * v1 + c2 * m2_1 * v2
+    J_sol = c1 * m1_2 * v1 + c2 * m2_2 * v2
+    
+    solution = torch.cat([R_sol, J_sol], dim=1)
+    
+    loss_crit = nn.MSELoss()
+    loss = loss_crit(solution, Y_true)
+    print(f'Loss of solution is: {loss.item(): .5f}')
 
 if __name__ == '__main__':
     # train_fit()
@@ -159,4 +199,5 @@ if __name__ == '__main__':
     # view_model4()
     # plot_model_fit()
     # plot_sol()
-    plot_sol_test()
+    # plot_sol_test()
+    solution_evaluation()

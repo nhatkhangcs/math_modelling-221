@@ -120,5 +120,4 @@ Epoch: 38500, train loss: 2.6278169, test loss: 1.1081324
 Epoch: 39000, train loss: 2.6278155, test loss: 1.1082381
 Epoch: 39500, train loss: 2.6278164, test loss: 1.1082145
 Epoch: 40000, train loss: 2.6278157, test loss: 1.1082506
-OrderedDict([('linear.weight', tensor([[ 2.1601,  3.7439],
-        [ 5.6771, -2.5837]]))])
+a = 2.1601, b = 3.7439, c = 5.6771, d = -2.5837

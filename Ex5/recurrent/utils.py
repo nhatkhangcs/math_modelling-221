@@ -11,9 +11,18 @@ import torch
 
 def explicit_euler(RJ, abcd):
     RJ.require_grad = False
-    R_new = RJ[:, 0] + (abcd[0]*RJ[:, 0] + abcd[1]*RJ[:, 1]) / 1000
+    R_new = RJ[:, 0] + (abcd[0]*RJ[:, 0] + abcd[1]*RJ[:, 1]) / 1000.
     R_new = R_new.unsqueeze(1)
-    J_new = RJ[:, 1] + (abcd[2]*RJ[:, 0] + abcd[3]*RJ[:, 1]) / 1000
+    J_new = RJ[:, 1] + (abcd[2]*RJ[:, 0] + abcd[3]*RJ[:, 1]) / 1000.
     J_new = J_new.unsqueeze(1)
 
     return torch.cat([R_new, J_new], dim=1)
+
+def explicit_euler_next(RJ, abcd):
+    RJ.require_grad = False
+    R_new = RJ[:, 0] + (abcd[0]*RJ[:, 0] + abcd[1]*RJ[:, 1]) / 1000.
+    R_new = R_new.unsqueeze(1)
+    J_new = RJ[:, 1] + (abcd[2]*RJ[:, 0] + abcd[3]*RJ[:, 1]) / 1000.
+    J_new = J_new.unsqueeze(1)
+
+    return torch.cat([R_new, J_new], dim=1)[[6], :]

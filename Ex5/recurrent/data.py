@@ -1,5 +1,6 @@
 import pandas as pd
 import torch
+from torch.utils.data import Dataset, DataLoader
 from config import args
 
 def normalize_data(RJ):     # x - min / max - min -> to [0, 1] range
@@ -16,7 +17,7 @@ def load_data():
     # data = data.drop(['index'],axis=1)
     RJ = data.to_numpy().reshape((-1, 2))
     RJ = torch.from_numpy(RJ).float()
-    # normalize_data(RJ)
+    normalize_data(RJ)
 
     helper = lambda RJ, RJ_prev: RJ - RJ_prev
     delta_list = [helper(RJ[i], RJ[i - 1]) for i in range(1, RJ.shape[0])]
@@ -29,4 +30,23 @@ def load_data():
     delta_RJ.requires_grad = False
 
     return RJ, delta_RJ
+
+def delta_RJ(RJ):
+    helper = lambda RJ, RJ_prev: RJ - RJ_prev
+    delta_list = [helper(RJ[i], RJ[i - 1]) for i in range(1, RJ.shape[0])]
+
+    delta_RJ = torch.stack(delta_list).requires_grad_(False)
+    return delta_RJ
+
+class RJData(Dataset):
+    def __init__(self):
+        super().__init__()
+        self.RJ, self.delta_RJ = load_data()
+        self.n_samples = self.RJ.shape[0]
+
+    def __getitem__(self, index):
+        return self.RJ[index, :]
+
+    def __len__(self):
+        return self.n_samples
 

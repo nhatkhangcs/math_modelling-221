@@ -23,7 +23,8 @@ def plot_data():
     plt.xlabel('Time (s)')
     plt.ylabel('Love')
     plt.grid()
-    plt.savefig('figures/plot_data.png')
+    plt.savefig(args.figure_path + 'plot_data.png')
+    plt.close()
 
 def plot_data_with_hypo(time_step, x, Y):
     data = pd.read_csv(args.data_path)
@@ -41,11 +42,12 @@ def plot_data_with_hypo(time_step, x, Y):
     plt.xlabel('Time (s)')
     plt.ylabel('Love')
     plt.grid()
-    plt.show()
+    plt.savefig(args.figure_path + 'fit.png', dpi=500)
+    plt.close()
 
 def plot_model_fit():
     model_fit = NetFit(save_path='fit/')
-    model_fit.load(args.fit_path + args.save_fit_name)
+    model_fit.load(args.fit_path + args.view_fit_name)
     model_fit.grad_off()
     model_fit.eval()
 
@@ -83,7 +85,8 @@ def plot_sol():
     plt.xlabel('Time (s)')
     plt.ylabel('Love')
     plt.grid()
-    plt.show()
+    plt.savefig(args.figure_path + 'sol.png', dpi=500)
+    plt.close()
 
 def plot_sol_test():
     data = pd.read_csv(args.data_path)
@@ -115,6 +118,7 @@ def plot_sol_test():
     plt.ylabel('Love')
     plt.grid()
     plt.show()
+    plt.close()
 
 def abcd_evolution(epoch, a, b, c, d):
     plt.plot(epoch, a, 'r-', markersize=2, label='a')
@@ -126,7 +130,20 @@ def abcd_evolution(epoch, a, b, c, d):
     plt.xlabel('Epoch')
     plt.ylabel('Value')
     plt.grid()
-    plt.savefig(args.figure_path + args.abcd_figure_name)
+    plt.savefig(args.figure_path + args.abcd_figure_name, dpi=500)
+    plt.close()
+
+def save_learning_curve(epoch, train_loss, test_loss, name):
+    plt.plot(epoch, train_loss, 'c-', markersize=2, label='Train loss')
+    plt.plot(epoch, test_loss, 'm-', markersize=2, label='Test loss')
+    
+    plt.title('Learning curve')
+    plt.legend(loc="upper right")
+    plt.xlabel('Epoch')
+    plt.ylabel('Loss')
+    plt.grid()
+    plt.savefig(args.figure_path + name, dpi=500)
+    plt.close()
 
 def main():
     plot_data()
