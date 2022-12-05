@@ -74,12 +74,6 @@ def train2():
     min_loss = float('inf')
     model.load(args.model_path + args.model_name)
 
-    RJ = next(iter(data_loader))
-    print(RJ)
-    predict_RJ = explicit_euler(RJ, [ 2.1601,  3.7439, 5.6771, -2.5837])
-    print(predict_RJ)
-    return
-
     for epoch in range(1, num_epochs + 1):
         total_epoch_loss = 0.
         for RJ in iter(data_loader):

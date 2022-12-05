@@ -196,7 +196,7 @@ def solution_evaluation():
 if __name__ == '__main__':
     train_fit()
     train_4()
-    view_model4()
+    # view_model4()
     # plot_model_fit()
     # plot_sol()
     # plot_sol_test()
