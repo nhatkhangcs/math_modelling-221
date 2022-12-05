@@ -194,10 +194,10 @@ def solution_evaluation():
     print(f'Loss of solution is: {loss.item(): .5f}')
 
 if __name__ == '__main__':
-    # train_fit()
-    # train_4()
-    # view_model4()
+    train_fit()
+    train_4()
+    view_model4()
     # plot_model_fit()
     # plot_sol()
     # plot_sol_test()
-    solution_evaluation()
+    # solution_evaluation()
