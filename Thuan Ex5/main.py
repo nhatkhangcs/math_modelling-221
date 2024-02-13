@@ -5,7 +5,8 @@ import numpy as np
 from sympy import symbols, diff, exp
 
 TOLERANCE = 1e-5
-ITERATION = 200000000
+MAX_ITERATION = 200000000
+DERIVATIVE = 1e-12
 
 def answer():
         
@@ -17,48 +18,60 @@ def answer():
     j0 = 3
     h = 0.001
 
-def newton_raphson(g, g_derivative, initial_guess, r0, j0, min_abs, min_value, max_iterations=1000, tolerance=1.3):
-    # output is an estimation of the root of f 
-    # using the Newton Raphson method
-    # iterative implementation
-
-    for _ in range(max_iterations):
-        val = g(initial_guess, r0, j0)
-
-        if abs(val) < min_abs:
-            min_abs = abs(val)
-            min_value = val
-
-        if abs(val) < tolerance:
-            return val
-        else:
-            initial_guess = initial_guess - g(initial_guess, r0, j0) / g_derivative(initial_guess, r0, j0)
-
-    return min_value
-
-def implicit_euler(r_derivative_equation, j_deriavative_equation, r_2derivative_equation, j_2derivative_equation, guess_r1, guess_j1, r0, j0, h):
-
-    def rg(initial_guess,r,j):
-        return initial_guess - r0 - h * r_derivative_equation(initial_guess, r, j)
-
-    def jg(initial_guess,r,j):
-        return initial_guess - j0 - h * j_deriavative_equation(initial_guess, r, j)
-
-    def rg_derivative(initial_guess,r,j):
-        return 1 - h * r_2derivative_equation(initial_guess, r, j)
+def derivative(f):
+    def df_dr(t, r, j):
+        return (f(t, r + DERIVATIVE, j) - f(t, r, j)) / DERIVATIVE
     
-    def jg_derivative(initial_guess,r,j):
-        return 1 - h * j_2derivative_equation(initial_guess, r, j)
-
+    def df_dj(t, r, j):
+        h = 1e-6  # Small perturbation
+        return (f(t, r, j + DERIVATIVE) - f(t, r, j)) / DERIVATIVE
     
-    r1 = newton_raphson(rg,rg_derivative,guess_r1, r0, j0,float('inf'), float('inf') , ITERATION, h**2)
-    j1 = newton_raphson(jg,jg_derivative,guess_j1, r0, j0,float('inf'), float('inf') , ITERATION, h**2)
-    return r1, j1
+    return df_dr, df_dj
 
 
-def ExplicitEuler(r_derivative_equation, j_deriavative_equation, t0, R0, J0, h):
-    R1 = R0 + r_derivative_equation(t0, R0, J0) * h
-    J1 = J0 + j_deriavative_equation(t0, R0, J0) * h
+def newton_raphson(F, J_F, initial_guess):
+    # Newton-Raphson iteration
+    for _ in range(MAX_ITERATION):
+        # Compute function values
+        val = F(initial_guess)
+
+        # Check convergence
+        if np.linalg.norm(val) < TOLERANCE:
+            return initial_guess
+
+        # Compute increments using Newton-Raphson formula
+        increments = np.linalg.solve(J_F(initial_guess), val)
+        initial_guess -= increments.astype(float) # Update initial guess
+
+    raise ValueError("Newton-Raphson did not converge")
+
+def implicit_euler(f, g,t0, r0, j0, h):
+    # Derivatives of f and g
+    df_dr, df_dj = derivative(f)
+    dg_dr, dg_dj = derivative(g)
+
+    # Function for F(R_{n+1}, J_{n+1})
+    def F(R_J):
+        R, J = R_J
+        return np.array([R - r0 - h * f(t0, R, J), J - j0 - h * g(t0, R, J)])
+
+    # Jacobian matrix of F(R_{n+1}, J_{n+1})
+    def J_F(R_J):
+        R, J = R_J
+        return np.array([[1 - h * df_dr(t0, R, J), -h * df_dj(t0, R, J)],
+                         [-h * dg_dr(t0, R, J), 1 - h * dg_dj(t0, R, J)]])
+
+    # Initial guess for Newton-Raphson
+    guess = np.array([r0, j0], dtype=float)
+
+    # Newton-Raphson iteration    
+    R1, J1 = newton_raphson(F, J_F, guess)
+
+    return R1, J1
+
+def ExplicitEuler(f, g, t0, R0, J0, h):
+    R1 = R0 + f(t0, R0, J0) * h
+    J1 = J0 + g(t0, R0, J0) * h
     return R1, J1
 
 def solve_quadratic(a, b, c):
@@ -95,10 +108,10 @@ def solve_RJ(a, b, c, d):
             c2 =(-j0*b - r0*(a-lambda1))/(b*(lambda2 - lambda1))
             return c1 * (-b) * lambda1 * cmath.e ** (lambda1 * t) + c2 * (-b) * lambda2 * cmath.e ** (lambda2 * t)
 
-        def r_2derivative_equation_two_distinct_real_roots(t, r0, j0):
-            c1 = (j0*b + r0*(a-lambda2))/(b*(lambda2 - lambda1))
-            c2 =(-j0*b - r0*(a-lambda1))/(b*(lambda2 - lambda1))
-            return c1 * (-b) * lambda1**2 * cmath.e ** (lambda1 * t) + c2 * (-b) * lambda2 ** 2 * cmath.e ** (lambda2 * t)
+        #def r_2derivative_equation_two_distinct_real_roots(t, r0, j0):
+        #    c1 = (j0*b + r0*(a-lambda2))/(b*(lambda2 - lambda1))
+        #    c2 =(-j0*b - r0*(a-lambda1))/(b*(lambda2 - lambda1))
+        #    return c1 * (-b) * lambda1**2 * cmath.e ** (lambda1 * t) + c2 * (-b) * lambda2 ** 2 * cmath.e ** (lambda2 * t)
 
         def j_equation_two_distinct_real_roots(t, r0, j0):
             c1 = (j0*b + r0*(a-lambda2))/(b*(lambda2 - lambda1))
@@ -110,12 +123,12 @@ def solve_RJ(a, b, c, d):
             c2 =(-j0*b - r0*(a-lambda1))/(b*(lambda2 - lambda1))
             return c1 * (a - lambda1) * lambda1 * cmath.e ** (lambda1 * t) + c2 * (a - lambda2) * lambda2 * cmath.e ** (lambda2 * t)
 
-        def j_2derivative_equation_two_distinct_real_roots(t, r0, j0):
-            c1 = (j0*b + r0*(a-lambda2))/(b*(lambda2 - lambda1))
-            c2 =(-j0*b - r0*(a-lambda1))/(b*(lambda2 - lambda1))
-            return c1 * (a - lambda1) * lambda1 **2 * cmath.e ** (lambda1 * t) + c2 * (a - lambda2) * lambda2**2 * cmath.e ** (lambda2 * t)
+        #def j_2derivative_equation_two_distinct_real_roots(t, r0, j0):
+        #    c1 = (j0*b + r0*(a-lambda2))/(b*(lambda2 - lambda1))
+        #    c2 =(-j0*b - r0*(a-lambda1))/(b*(lambda2 - lambda1))
+        #    return c1 * (a - lambda1) * lambda1 **2 * cmath.e ** (lambda1 * t) + c2 * (a - lambda2) * lambda2**2 * cmath.e ** (lambda2 * t)
 
-        return r_equation_two_distinct_real_roots, j_equation_two_distinct_real_roots, r_derivative_equation_two_distinct_real_roots, j_derivative_equation_two_distinct_real_roots, r_2derivative_equation_two_distinct_real_roots, j_2derivative_equation_two_distinct_real_roots
+        return r_equation_two_distinct_real_roots, j_equation_two_distinct_real_roots, r_derivative_equation_two_distinct_real_roots, j_derivative_equation_two_distinct_real_roots
         
     elif n == -2:
         yamma = a - d
@@ -254,7 +267,7 @@ def show_data():
 
 
 def main():
-    r_equation, j_equation, r_derivative_equation, j_derivative_equation, r_2derivative_equation, j_2derivative_equation = solve_RJ(2.1601, 3.7439, 5.6771, -2.5837)
+    r_equation, j_equation, r_derivative_equation, j_derivative_equation = solve_RJ(2.1601, 3.7439, 5.6771, -2.5837)
 
     
     data = pd.read_csv('exact.csv')
@@ -273,7 +286,7 @@ def main():
         #current_r , current_j = ExplicitEuler(r_derivative_equation,j_derivative_equation,0.001 ,current_r,current_j, 0.001/k)
         #print(f"t: {t/k}")
 
-        current_r , current_j = implicit_euler(r_derivative_equation,j_derivative_equation, r_2derivative_equation, j_2derivative_equation, current_r, current_r, current_r,current_j, 0.001/k)
+        current_r , current_j = implicit_euler(r_derivative_equation,j_derivative_equation, 0, current_r,current_j, 0.001/k)
         
         plt.scatter(t/k, current_r, color='green', s = 0.5)
         plt.scatter(t/k, current_j, color='black', s = 0.5)
